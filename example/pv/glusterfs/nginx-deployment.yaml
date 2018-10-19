@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: 192.168.56.11/web/nginx:v1.1
+        ports:
+        - containerPort: 80
+        command: ["nginx"]
+        volumeMounts:
+          - name: gluster-jenkins-volume
+            mountPath: "/usr/share/nginx/html"
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 400Mi
+          requests:
+            cpu: 200m
+            memory: 100Mi
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/bash","-c","mkdir -p /tmp/$POD_IP"]
+          preStop:
+            exec:
+              command: ["/usr/sbin/nginx","-s","quit"]
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 5
+      imagePullSecrets:
+        - name: harbor-secret
+      volumes:
+      - name: gluster-jenkins-volume
+        persistentVolumeClaim:
+          claimName: pvc-jenkins-master

@@ -1,0 +1,4 @@
+#提前生成自己的证书,根证书默认最大5年
+cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+ls -l ca*
+

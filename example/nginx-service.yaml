@@ -1,0 +1,38 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 80
+    nodePort: 28000
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: 192.168.56.11/web/nginx:v1.1
+        ports:
+        - containerPort: 80
+        command: ["nginx"]
+      imagePullSecrets:
+        - name: harbor-secret

@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        action: restart201809281352
+    spec:
+      containers:
+      - name: nginx
+        image: 192.168.56.11/web/tomcat:v8.5.15
+        ports:
+        - containerPort: 8080
+        #command: ["nginx"]
+        volumeMounts:
+          - name: gluster-jenkins-volume
+            mountPath: "/usr/share/nginx/html"
+          - name:  config-volume
+            mountPath: /var/cache/yum
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 400Mi
+          requests:
+            cpu: 200m
+            memory: 100Mi
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: TZ
+            value: Asia/Shanghai
+        lifecycle:
+          postStart:
+            exec:
+              #command: ["/bin/bash","-c","mkdir -p /tmp/$POD_IP"]
+              command:
+                - "sh" 
+                - "-c"
+                - >
+                  mkdir -p /tmp/$POD_IP;
+                  touch /tmp/$POD_IP/zhaowei;
+          preStop:
+            exec:
+              command: ["/usr/sbin/nginx","-s","quit"]
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+      imagePullSecrets:
+        - name: harbor-secret
+      volumes:
+      - name: gluster-jenkins-volume
+        persistentVolumeClaim:
+          claimName: pvc-jenkins-master
+      - name: config-volume
+        configMap:
+          name: nginx-conf

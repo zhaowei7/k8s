@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liveness-http-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.13.12
+        ports:
+        - containerPort: 80
+        args:
+        - /bin/sh
+        - -c
+        - touch /tmp/healthy;sleep 30s; rm -rf /tmp/healthy;sleep600
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/bash","-c","echo devopsedu > /tmp/health"]
+        readinessProbe:
+          tcpSocekt:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10

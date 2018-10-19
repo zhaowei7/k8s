@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-daemonset
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: 192.168.56.11/web/nginx:v1.2
+        ports:
+        - containerPort: 80
+        command: ["nginx"]
+      imagePullSecrets:
+        - name: harbor-secret

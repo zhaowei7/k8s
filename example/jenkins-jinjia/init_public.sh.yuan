@@ -1,0 +1,14 @@
+# cat /opt/init_public.sh 
+#!/bin/bash
+cat /dev/null > /tmp/${9}jenkins
+echo name:$1 > /tmp/${9}jenkins
+echo image:$2 >> /tmp/${9}jenkins
+echo version:$3 >> /tmp/${9}jenkins
+echo replicas_num:$4 >> /tmp/${9}jenkins
+echo port:$5 >> /tmp/${9}jenkins
+echo cpu:$6 >> /tmp/${9}jenkins
+echo memory:$7 >> /tmp/${9}jenkins
+echo branch:$8 >> /tmp/${9}jenkins
+echo namespace:$9 >> /tmp/${9}jenkins
+echo env_name:${10} >> /tmp/${9}jenkins
+echo env_value:${11} >> /tmp/${9}jenkins
